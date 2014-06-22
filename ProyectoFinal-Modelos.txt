@@ -1,0 +1,347 @@
+Random Forests no preproces----------------------------------------------------------------------------------
+all the variables
+data<-read.csv(file.choose(),header=T)
+library(caret)
+inTrain<-createDataPartition(data$classe, p=0.7,list=FALSE)
+training<-data[inTrain,]
+testing<-data[-inTrain,]
+modFit<-train(classe~.,data=training,method="rf", prox=TRUE)
+modFit
+Random Forest 
+
+13737 samples
+  158 predictors
+    5 classes: 'A', 'B', 'C', 'D', 'E' 
+
+No pre-processing
+Resampling: Bootstrapped (25 reps) 
+
+Summary of sample sizes: 285, 285, 285, 285, 285, 285, ... 
+
+Resampling results across tuning parameters:
+
+  mtry  Accuracy  Kappa  Accuracy SD
+  2     0.258     0      0.0449     
+  117   0.761     0.698  0.0424     
+  6950  0.776     0.717  0.0386     
+  Kappa SD
+  0       
+  0.053   
+  0.0484  
+
+Accuracy was used to select
+ the optimal model using  the
+ largest value.
+The final value used for the model
+ was mtry = 6949.
+ 
+pred<-predict(modFit,testing)
+
+Random Forests preprocess----------------------------------------------------------------------------------
+58 variables 
+data<-read.csv(file.choose(),header=T)
+library(caret)
+inTrain<-createDataPartition(data$classe, p=0.7,list=FALSE)
+training<-data[inTrain,]
+testing<-data[-inTrain,]
+modFit<-train(classe~.,data=training,method="rf",preProcess ="pca")
+modFit
+Random Forest 
+
+13737 samples
+   57 predictors
+    5 classes: 'A', 'B', 'C', 'D', 'E' 
+
+Pre-processing: principal
+ component signal extraction,
+ scaled, centered 
+Resampling: Bootstrapped (25 reps) 
+
+Summary of sample sizes: 13737, 13737, 13737, 13737, 13737, 13737, ... 
+
+Resampling results across tuning parameters:
+
+  mtry  Accuracy  Kappa  Accuracy SD
+  2     0.974     0.967  0.00217    
+  40    0.962     0.952  0.0052     
+  79    0.962     0.952  0.00534    
+  Kappa SD
+  0.00273 
+  0.00656 
+  0.00674 
+
+Accuracy was used to select
+ the optimal model using  the
+ largest value.
+The final value used for the model
+ was mtry = 2.
+
+predictions<-predict(modFit,newdata=testing)
+confusionMatrix(predictions,testing$classe)
+
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1671    5    0    0    0
+         B    2 1133    6    0    0
+         C    1    1 1020    8    0
+         D    0    0    0  955    1
+         E    0    0    0    1 1081
+
+Overall Statistics
+                                          
+               Accuracy : 0.9958          
+                 95% CI : (0.9937, 0.9972)
+    No Information Rate : 0.2845          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9946          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9982   0.9947   0.9942   0.9907   0.9991
+Specificity            0.9988   0.9983   0.9979   0.9998   0.9998
+Pos Pred Value         0.9970   0.9930   0.9903   0.9990   0.9991
+Neg Pred Value         0.9993   0.9987   0.9988   0.9982   0.9998
+Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+Detection Rate         0.2839   0.1925   0.1733   0.1623   0.1837
+Detection Prevalence   0.2848   0.1939   0.1750   0.1624   0.1839
+Balanced Accuracy      0.9985   0.9965   0.9960   0.9952   0.9994
+
+impor<-varImp(modFit,scale=FALSE)
+impor
+
+rf variable importance
+
+  only 20 most important variables shown (out of 36)
+
+     Overall
+PC22   509.8
+PC20   509.2
+PC21   417.4
+PC10   413.5
+PC19   401.5
+PC1    388.9
+PC3    371.8
+PC13   363.7
+PC12   358.1
+PC2    353.7
+PC25   351.8
+PC17   349.3
+PC6    343.6
+PC23   337.3
+PC27   333.4
+PC18   333.0
+PC4    327.7
+PC24   327.1
+PC15   315.6
+PC29   295.1
+
+rocimpor<-filterVarImp(x=training[,-ncol(training)],y=training$classe)
+head(rocimpor)
+
+                             A         B         C         D         E
+user_name            0.5254355 0.5436465 0.5201147 0.5436465 0.5114036
+raw_timestamp_part_1 0.6347194 0.6347194 0.6059797 0.6037459 0.6184373
+raw_timestamp_part_2 0.5147211 0.5176503 0.5151685 0.5137249 0.5176503
+cvtd_timestamp       0.5868728 0.6148735 0.5640168 0.6148735 0.6006894
+new_window           0.5015346 0.5010974 0.5015068 0.5015346 0.5013485
+num_window           0.6642450 0.6642450 0.6399553 0.5689943 0.6466230
+
+plot(impor,top=20)
+ 
+End up with warnings
+ 
+trees----------------------------------------------------------------------------------
+58 variables
+library(ggplot2)
+data<-read.csv(file.choose(),header=T)
+library(caret)
+inTrain<-createDataPartition(data$classe, p=0.7,list=FALSE)
+training<-data[inTrain,]
+testing<-data[-inTrain,]
+trees<-train(classe~.,method="rpart",data=training)
+trees$finalModel
+n= 13737 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+ 1) root 13737 9831 A (0.28 0.19 0.17 0.16 0.18)  
+   2) roll_belt< 130.5 12578 8684 A (0.31 0.21 0.19 0.18 0.11)  
+     4) pitch_forearm< -33.95 1101    7 A (0.99 0.0064 0 0 0) *
+     5) pitch_forearm>=-33.95 11477 8677 A (0.24 0.23 0.21 0.2 0.12)  
+      10) cvtd_timestamp02/12/2011 13:33>=0.5 915  223 A (0.76 0.24 0 0 0) *
+      11) cvtd_timestamp02/12/2011 13:33< 0.5 10562 8134 B (0.2 0.23 0.23 0.21 0.13)  
+        22) magnet_dumbbell_z< -31.5 3583 2235 A (0.38 0.31 0.084 0.19 0.04)  
+          44) raw_timestamp_part_1< 1.322838e+09 817   38 A (0.95 0.04 0.0061 0 0) *
+          45) raw_timestamp_part_1>=1.322838e+09 2766 1703 B (0.21 0.38 0.11 0.25 0.051) *
+        23) magnet_dumbbell_z>=-31.5 6979 4883 C (0.11 0.19 0.3 0.22 0.18) *
+   3) roll_belt>=130.5 1159   12 E (0.01 0 0 0 0.99) *
+
+plot(trees$finalModel,uniform=TRUE,main="Classification Tree")
+text(trees$finalModel,use.n=TRUE,all=TRUE,cex=.8)
+library(rattle)
+fancyRpartPlot(trees$finalModel)
+pt<-predict(trees,newdata=testing)
+confusionMatrix(pt,testing$classe)
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1102  129    0    0    0
+         B  226  400  147  280   82
+         C  344  610  879  684  516
+         D    0    0    0    0    0
+         E    2    0    0    0  484
+
+Overall Statistics
+                         
+               Accuracy :
+                 95% CI :
+    No Information Rate :
+    P-Value [Acc > NIR] :
+                         
+                  Kappa :
+ Mcnemar's Test P-Value :
+                
+ 0.4868         
+ (0.474, 0.4997)
+ 0.2845         
+ < 2.2e-16      
+                
+ 0.357          
+ NA             
+
+Statistics by Class:
+
+                     Class: A Class: B
+Sensitivity            0.6583  0.35119
+Specificity            0.9694  0.84513
+Pos Pred Value         0.8952  0.35242
+Neg Pred Value         0.8771  0.84442
+Prevalence             0.2845  0.19354
+Detection Rate         0.1873  0.06797
+Detection Prevalence   0.2092  0.19286
+Balanced Accuracy      0.8138  0.59816
+                     Class: C Class: D
+Sensitivity            0.8567   0.0000
+Specificity            0.5567   1.0000
+Pos Pred Value         0.2898      NaN
+Neg Pred Value         0.9485   0.8362
+Prevalence             0.1743   0.1638
+Detection Rate         0.1494   0.0000
+Detection Prevalence   0.5154   0.0000
+Balanced Accuracy      0.7067   0.5000
+                     Class: E
+Sensitivity           0.44732
+Specificity           0.99958
+Pos Pred Value        0.99588
+Neg Pred Value        0.88924
+Prevalence            0.18386
+Detection Rate        0.08224
+Detection Prevalence  0.08258
+Balanced Accuracy     0.72345
+> confusionMatrix(pt,testing$classe)
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1102  129    0    0    0
+         B  226  400  147  280   82
+         C  344  610  879  684  516
+         D    0    0    0    0    0
+         E    2    0    0    0  484
+
+Overall Statistics
+                                         
+               Accuracy : 0.4868         
+                 95% CI : (0.474, 0.4997)
+    No Information Rate : 0.2845         
+    P-Value [Acc > NIR] : < 2.2e-16      
+                                         
+                  Kappa : 0.357          
+ Mcnemar's Test P-Value : NA             
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.6583  0.35119   0.8567   0.0000  0.44732
+Specificity            0.9694  0.84513   0.5567   1.0000  0.99958
+Pos Pred Value         0.8952  0.35242   0.2898      NaN  0.99588
+Neg Pred Value         0.8771  0.84442   0.9485   0.8362  0.88924
+Prevalence             0.2845  0.19354   0.1743   0.1638  0.18386
+Detection Rate         0.1873  0.06797   0.1494   0.0000  0.08224
+Detection Prevalence   0.2092  0.19286   0.5154   0.0000  0.08258
+Balanced Accuracy      0.8138  0.59816   0.7067   0.5000  0.72345
+
+trees preProcess----------------------------------------------------------------------------------
+58 variables
+library(ggplot2)
+data<-read.csv(file.choose(),header=T)
+library(caret)
+inTrain<-createDataPartition(data$classe, p=0.7,list=FALSE)
+training<-data[inTrain,]
+testing<-data[-inTrain,]
+treesPr<-train(classe~.,method="rpart",preProcess = "pca",data=training)
+treesPr$finalModel
+n= 13737 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+ 1) root 13737 9831 A (0.28 0.19 0.17 0.16 0.18)  
+   2) PC12>=-1.054655 11448 7758 A (0.32 0.21 0.2 0.16 0.11)  
+     4) PC18< -1.207058 1349  225 A (0.83 0.094 0.015 0.021 0.036) *
+     5) PC18>=-1.207058 10099 7533 A (0.25 0.23 0.23 0.18 0.11)  
+      10) PC21>=-0.1679678 6015 3736 A (0.38 0.29 0.13 0.12 0.089)  
+        20) PC2< 1.954081 3483 1754 A (0.5 0.2 0.0026 0.16 0.14) *
+        21) PC2>=1.954081 2532 1512 B (0.22 0.4 0.3 0.06 0.015) *
+      11) PC21< -0.1679678 4084 2581 C (0.07 0.14 0.37 0.27 0.15)  
+        22) PC21< -1.191131 1782  867 C (0.11 0.31 0.51 0.072 0.0011) *
+        23) PC21>=-1.191131 2302 1345 D (0.043 0.015 0.26 0.42 0.27)  
+          46) PC28< -0.434872 922  388 C (0 0.0054 0.58 0.11 0.3) *
+          47) PC28>=-0.434872 1380  525 D (0.071 0.022 0.039 0.62 0.25) *
+   3) PC12< -1.054655 2289  972 E (0.094 0.098 0.041 0.19 0.58) *
+
+plot(treesPr$finalModel,uniform=TRUE,main="Classification Tree")
+text(treesPr$finalModel,use.n=TRUE,all=TRUE,cex=.8)
+library(rattle)
+fancyRpartPlot(treesPr$finalModel)
+ptPr<-predict(treesPr,newdata=testing)
+confusionMatrix(ptPr,testing$classe)
+
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1212  345   11  264  241
+         B  203  432  377   71   25
+         C   87  258  588  109  113
+         D   62    9   23  339  161
+         E  110   95   27  181  542
+
+Overall Statistics
+                                          
+               Accuracy : 0.529           
+                 95% CI : (0.5161, 0.5418)
+    No Information Rate : 0.2845          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.3983          
+ Mcnemar's Test P-Value : < 2.2e-16       
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.7240  0.37928  0.57310   0.3517   0.5009
+Specificity            0.7955  0.85756  0.88331   0.9482   0.9140
+Pos Pred Value         0.5847  0.38989  0.50909   0.5707   0.5675
+Neg Pred Value         0.8788  0.85200  0.90740   0.8819   0.8905
+Prevalence             0.2845  0.19354  0.17434   0.1638   0.1839
+Detection Rate         0.2059  0.07341  0.09992   0.0576   0.0921
+Detection Prevalence   0.3523  0.18828  0.19626   0.1009   0.1623
+Balanced Accuracy      0.7598  0.61842  0.72820   0.6499   0.7075
