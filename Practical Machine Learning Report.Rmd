@@ -24,7 +24,7 @@ The important preprocess technique made come later. Using principal components a
 
 The final model use the "PCA" method that give us the combination of the most important predictors that reduce the noise and maintain the accuracy. Combinating the sesgo of data training set and applying the PCA method to it come out whit 36 significant predictors of the total of 57 possible ones. The data training was split in 70% for training and 30% for testing.
 
-Whit all this, it was expected an out of sample error very small, cause seeing no miss classification, will probably and surely would be wrong.
+Whit all this, it was expected an out of sample error very small, (cause seeing no miss classification, will probably and surely would be wrong), estimating an error of 0.0042. In ej. with 20 predictions made we were wrong in 1.68 of them.
 
 **Model and Confusion Matrix**
 
